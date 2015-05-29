@@ -1,4 +1,5 @@
 require_relative './player'
+require_relative './leader_board'
 
 class Pig
   def initialize
@@ -29,16 +30,25 @@ class Pig
   end
 
   def remove_losing_players!
-    if @players.any? { |p| p.score > @max_score }
+    if @players.any? { |p| p.score >= @max_score }
       max_score = @players.map { |p| p.score }.max
+      remove_players = @players.select{ |p| p.score < max_score }
+      remove_players.each do |loser|
+        LeaderBoard.create(player_name: loser.name, win: 0, loss: 1)
+      end
       @players = @players.select { |p| p.score == max_score }
     end
   end
 
   def winner
     if @players.length == 1
+      LeaderBoard.create(player_name: @players.first.name, win: 1, loss: 0)
       @players.first
     end
+  end
+
+  def winning_player
+    return @players.first.name
   end
 
   def take_turn player
